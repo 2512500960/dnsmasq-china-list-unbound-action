@@ -18,6 +18,7 @@ jobs:
          cd dnsmasq-china-list
          make SERVER=114.114.114.114 NEWLINE=DOS unbound
          zip unbound_conf.zip apple.china.unbound.conf google.china.unbound.conf accelerated-domains.china.unbound.conf 
+         cp unbound_conf.zip ../
          echo "::set-env name=DATE::$(date "+%Y.%m.%d.%H")"
       - name: create release
         id: create_release
