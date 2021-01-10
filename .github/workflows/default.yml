@@ -1,0 +1,44 @@
+name: default
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 9 * * 1'
+  pull_request:
+    branches: [ main ]
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    steps:   
+      - name: do generate
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+         git clone --depth=1 https://github.com/felixonmars/dnsmasq-china-list.git
+         cd dnsamsq-china-list
+         make SERVER=114.114.114.114 NEWLINE=DOS unbound
+         zip unbound_conf.zip apple.china.unbound.conf google.china.unbound.conf accelerated-domains.china.unbound.conf 
+         echo "::set-env name=DATE::$(date "+%Y.%m.%d.%H")"
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.DATE }}
+          release_name: Release  ${{ env.DATE }}
+          body: |
+            Changes in this Release
+            - updated cordinating with China ips from apnic.net
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./unbound_conf.zip
+          asset_name: unbound_conf.zip
+          asset_content_type: application/zip
