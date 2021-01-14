@@ -30,7 +30,7 @@ jobs:
           release_name: Release  ${{ env.DATE }}
           body: |
             Changes in this Release
-            - updated cordinating with China ips from apnic.net
+            - wooohooo
           draft: false
           prerelease: false
       - name: Upload Release Asset
